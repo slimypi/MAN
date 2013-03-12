@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package matrice;
+import java.util.*;
 
 /**
  *
@@ -43,10 +44,13 @@ public class Matrice {
             }
         }
     }
+    
+    
+    
 
     // copy constructor
     private Matrice(Matrice A) { this(A.data); }
-
+    
     // create and return a random M-by-N matrix with values between 0 and 1
     public static Matrice random(int M, int N) {
         Matrice A = new Matrice(M, N);
@@ -153,7 +157,7 @@ public class Matrice {
             b.swap(i, max);
 
             // singular
-            if (A.data[i][i] == 0.0) throw new RuntimeException("Matrix is singular.");
+            if (A.data[i][i] == 0.0) throw new RuntimeException("Matrice singulaire.");
 
             // pivot within b
             for (int j = i + 1; j < N; j++)
@@ -190,80 +194,38 @@ public class Matrice {
             System.out.println();
         							}
     					}
-    
-    /*public void reduction_Gauss (Matrice b)
-    {
-    	
-    	for (int k=0;k<b.N-1;k++)
-    	{
-    		for (int i=k+1;i<=N-1;i++ )
-    		{
-    			double c = this.data[i-1][k-1]/this.data[k-1][k-1];
-    			b.data[i-1][0]=b.data[i-1][0] - c*b.data[k][0];
-    			this.data[i-1][k-1]=0;
-    		
-    			for(int j=k+1;j<=b.N-1;j++)
-    			{
-    				this.data[i-1][j-1]=this.data[i-1][j-1] - c*this.data[k-1][j-1];
-    				this.
-    			}
-    		}
-    	}
-    	
+ public boolean triangulaire()
+ {
+     boolean indice =false;
+     for(int i =0;i<this.M;i++)
+     {
+         for(int j=0;j<i;j++)
+         {
+             if(this.data[i][j]==0)
+             {
+                 indice=true;
+             }
+             else
+                 indice=false;
+         }
+        }
+     if(indice==false)
+     {
+         for( int i=0;i<this.M;i++)
+         {
+             for( int j=this.M -1;j>i;j--)
+             {
+                 if(this.data[i][j]==0)
+                 {
+                     indice=true;
+                    }
+                 else
+                     indice=false;
+         }
+     }
     }
-}
-    
-    public Matrice[] reductionLU()
-    {
-    	Matrice tableau[]= new Matrice[2];
-    	tableau[0]= new Matrice(N,M);
-    	tableau[1]= new Matrice(N,M);
-    	for (int i = 0; i < N; i++)
-            tableau[0].data[i][i] = 1;
-    	int i;
-    	for ( i =1;i<N;i++)
-    	{
-    		for(int j=i;j<=N;j++)
-    		{
-    		
-    			double s=0;
-    			for(int k=1;k<=i-1;k++)
-    			{
-    				s=s+tableau[0].data[i][k]*tableau[1].data[k][j];
-    			}
-    		
-    			tableau[1].data[i][j]=this.data[i][j]-s;
-    		}
-    		
-    		for(int j = i+1;j<=this.N;j++)
-    		{
-    			
-    			double ss=0;
-    			for(int k=1;k<=i-1;k++)
-    			{
-    				
-    				ss=ss+tableau[0].data[j][k]*tableau[1].data[k][i];
-    			}
-    			
-    			
-				tableau[0].data[j][i]= 1/tableau[1].data[i][i]*(this.data[j][i]- ss);
-    		}
-    	}
-    	for(int j = i+1;j<=this.N;j++)
-		{
-			
-			double sss=0;
-			for(int k=1;k<=this.N-1;k++)
-			{
-				
-				sss=sss+tableau[0].data[this.N][k]*tableau[1].data[k][this.N];
-			}
-			
-    			tableau[1].data[this.N][this.N]=this.data[N][N]-sss;
-    			
-    }
-    	return tableau;
-    }*/
+     return indice;
+ }
     
     public Matrice getL()
     { 
@@ -333,6 +295,41 @@ public class Matrice {
         System.out.println("Sortie Marice Cholesky : ");
         return X;
     }
+    
+    public Matrice ResolutionLU(Matrice b)
+    {
+        Matrice L = this.getL();
+        Matrice U = this.getU();
+        
+        Matrice y=L.solve(b);
+        Matrice x=U.solve(y);
+        System.out.println("Résolu avec La Décomposition LU!");
+        return x;
+    }
+    
+    public Matrice remontee(Matrice b)
+    {
+        Matrice X=new Matrice(b.M,1);
+        double somme;
+        X.data[0][0]=b.data[0][0]/this.data[0][0] ;
+        for(int i=1;i<this.M;i++)
+        {
+            somme=b.data[i][0];
+            for(int j=0;j<=i-1;j++)
+            {
+                somme=somme-this.data[i][j]*X.data[j][0];
+            }
+            X.data[i][0]=somme/this.data[i][i];
+        }
+        return X;
+    }
+    
+    
+    
+    
+    
+    
+    
     public static void main(String[] args) {
         Matrice A = Matrice.random(5,5);
 		A.show();
@@ -358,15 +355,20 @@ public class Matrice {
         D.remplire(1,1,11);
         D.remplire(2, 2, 15);
         Matrice btest = new Matrice(3,1);
-        btest.remplire(0,0,1);
-        btest.remplire(1, 0, 1);
-        btest.remplire(2,0, 1);
+        btest.remplire(0,0,12);
+        btest.remplire(1, 0, 11);
+        btest.remplire(2,0, 15);
         btest.show();
         D.show();
         //Matrice XX=new Matrice(1,3);
-       Matrice XX=D.solve(btest);
-        XX.show();
-        
+       //Matrice XX=D.solve(btest);
+       // XX.show();
+       System.out.println("again");
+       Matrice YY=D.ResolutionLU(btest);
+       //YY.show();
+       Matrice test=D.remontee(btest);
+       test.show();
+       System.out.println(D.triangulaire());
         
      }
 }
